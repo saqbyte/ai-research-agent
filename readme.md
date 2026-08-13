@@ -227,10 +227,6 @@ A broader market or opportunity analysis can produce a more detailed structured 
 │   ├── v7_agent_loop.py
 │   └── v8_planning_agent.py
 │
-├── learning/
-│   ├── v9.1_modular_architecture.md
-│   ├── v9.2_structured_output.md
-│   └── v9.3_logging_error_handling.md
 │
 ├── main.py
 ├── README.md
