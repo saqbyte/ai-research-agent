@@ -1,8 +1,13 @@
-from src.planner import create_research_plan
-from src.researcher import execute_research
+from src.planner import (
+    create_research_plan
+)
+
+from src.researcher import (
+    execute_research
+)
 
 
-def research_agent(topic):
+def research_agent(topic: str):
     """
     Run the complete research workflow.
     """
@@ -14,7 +19,9 @@ def research_agent(topic):
             "Please provide a research topic."
         )
 
-    plan = create_research_plan(topic)
+    plan = create_research_plan(
+        topic
+    )
 
     report = execute_research(
         topic,

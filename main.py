@@ -12,19 +12,37 @@ def main():
 
     try:
 
-        result = research_agent(topic)
+        result = research_agent(
+            topic
+        )
+
+        plan = result["plan"]
+
+        print("\n=============================")
+        print("RESEARCH OBJECTIVE")
+        print("=============================")
+
+        print(plan.objective)
 
         print("\n=============================")
         print("RESEARCH PLAN")
         print("=============================")
 
-        print(result["plan"])
+        for index, step in enumerate(
+            plan.steps,
+            start=1
+        ):
+            print(
+                f"{index}. {step}"
+            )
 
         print("\n=============================")
         print("FINAL RESEARCH REPORT")
         print("=============================")
 
-        print(result["report"])
+        print(
+            result["report"]
+        )
 
     except Exception as error:
 

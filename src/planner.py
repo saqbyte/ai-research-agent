@@ -3,21 +3,29 @@ from src.config import (
     get_openai_client
 )
 
+from src.models import ResearchPlan
+
 from src.prompts import (
     PLANNER_INSTRUCTIONS
 )
 
 
-def create_research_plan(topic):
+def create_research_plan(
+    topic: str
+) -> ResearchPlan:
     """
-    Generate a research plan for a topic.
+    Generate a structured research plan.
 
     Args:
-        topic: User's research request.
+        topic:
+            User's research request.
 
     Returns:
-        Research plan as text.
+        ResearchPlan:
+            Parsed and validated research plan.
     """
+
+    topic = topic.strip()
 
     if not topic:
         raise ValueError(
@@ -26,21 +34,22 @@ def create_research_plan(topic):
 
     client = get_openai_client()
 
-    response = client.responses.create(
+    response = client.responses.parse(
         model=MODEL_NAME,
 
-        instructions=(
-            PLANNER_INSTRUCTIONS
-        ),
+        instructions=PLANNER_INSTRUCTIONS,
 
-        input=topic
+        input=topic,
+
+        text_format=ResearchPlan
     )
 
-    plan = response.output_text
+    plan = response.output_parsed
 
-    if not plan:
+    if plan is None:
         raise RuntimeError(
-            "Planner returned an empty response."
+            "Planner did not return "
+            "a structured research plan."
         )
 
-    return plan.strip()
+    return plan

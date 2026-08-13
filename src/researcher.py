@@ -3,27 +3,43 @@ from src.config import (
     get_openai_client
 )
 
+from src.models import ResearchPlan
+
 from src.prompts import (
     RESEARCHER_INSTRUCTIONS
 )
 
 
-def execute_research(topic, plan):
+def execute_research(
+    topic: str,
+    plan: ResearchPlan
+) -> str:
     """
-    Execute a research plan using web search.
+    Execute a structured research plan
+    using web search.
     """
+
+    topic = topic.strip()
 
     if not topic:
         raise ValueError(
             "Research topic cannot be empty."
         )
 
-    if not plan:
+    if not plan.steps:
         raise ValueError(
-            "Research plan cannot be empty."
+            "Research plan has no steps."
         )
 
     client = get_openai_client()
+
+    formatted_steps = "\n".join(
+        f"{index}. {step}"
+        for index, step in enumerate(
+            plan.steps,
+            start=1
+        )
+    )
 
     research_input = f"""
 Research Request:
@@ -31,9 +47,14 @@ Research Request:
 {topic}
 
 
-Research Plan:
+Research Objective:
 
-{plan}
+{plan.objective}
+
+
+Research Steps:
+
+{formatted_steps}
 
 
 Execute this research plan now.
