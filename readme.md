@@ -143,3 +143,11 @@ This repository is intentionally being built incrementally. Each version represe
 This is a hands-on portfolio project focused on learning AI agent engineering by building from first principles.
 
 The objective is not just to make an agent that works, but to understand why it works, how its components interact, and how the system can be improved over time.
+
+
+
+## Limitations
+
+- Research queries may take longer than standard LLM responses because the agent performs web searches and source verification.
+- Complex research tasks may consume more tokens due to planning, evidence gathering, and synthesis.
+- The agent is designed for research-oriented questions rather than casual or low-complexity queries.
