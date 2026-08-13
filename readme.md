@@ -1,3 +1,7 @@
+![Python](https://img.shields.io/badge/Python-3.14-blue)
+![Tests](https://img.shields.io/badge/tests-12%20passing-brightgreen)
+![Status](https://img.shields.io/badge/status-complete-brightgreen)
+![Project](https://img.shields.io/badge/portfolio-project%20%2301-blueviolet)
 # 🔎 AI Research Agent
 
 A research-focused AI agent built from first principles using Python and the OpenAI API.
@@ -566,3 +570,7 @@ This project is intended for educational and portfolio purposes.
 **Research Capability:** Real-time web search  
 **Structured Output:** Pydantic  
 **Testing:** pytest + mocked external dependencies
+
+## 🏗️ Architecture
+
+![AI Research Agent Architecture](docs/architecture.png)
