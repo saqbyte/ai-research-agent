@@ -275,7 +275,7 @@ A broader market or opportunity analysis can produce a more detailed structured 
 ## 1. Clone the Repository
 
 ```bash
-git clone <YOUR-REPOSITORY-URL>
+git clone https://github.com/saqbyte/ai-research-agent.git
 cd ai-agent-journey/01-research-agent
 ```
 
