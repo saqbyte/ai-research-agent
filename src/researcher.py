@@ -1,13 +1,22 @@
+from openai import (
+    APIConnectionError,
+    APITimeoutError,
+    AuthenticationError,
+    BadRequestError,
+    RateLimitError,
+)
+
 from src.config import (
     MODEL_NAME,
     get_openai_client
 )
 
+from src.logger import get_logger
 from src.models import ResearchPlan
+from src.prompts import RESEARCHER_INSTRUCTIONS
 
-from src.prompts import (
-    RESEARCHER_INSTRUCTIONS
-)
+
+logger = get_logger(__name__)
 
 
 def execute_research(
@@ -22,16 +31,24 @@ def execute_research(
     topic = topic.strip()
 
     if not topic:
+
+        logger.warning(
+            "Empty research topic received."
+        )
+
         raise ValueError(
             "Research topic cannot be empty."
         )
 
     if not plan.steps:
+
+        logger.warning(
+            "Research plan contains no steps."
+        )
+
         raise ValueError(
             "Research plan has no steps."
         )
-
-    client = get_openai_client()
 
     formatted_steps = "\n".join(
         f"{index}. {step}"
@@ -64,28 +81,100 @@ Do not create another plan.
 Use web research to gather reliable evidence.
 
 When sufficient information has been collected,
-produce the final research report.
+answer the user's request at an appropriate level
+of detail.
 """
 
-    response = client.responses.create(
-        model=MODEL_NAME,
-
-        instructions=RESEARCHER_INSTRUCTIONS,
-
-        input=research_input,
-
-        tools=[
-            {
-                "type": "web_search"
-            }
-        ]
+    logger.info(
+        "Starting research execution."
     )
+
+    client = get_openai_client()
+
+    try:
+
+        response = client.responses.create(
+            model=MODEL_NAME,
+            instructions=RESEARCHER_INSTRUCTIONS,
+            input=research_input,
+            tools=[
+                {
+                    "type": "web_search"
+                }
+            ]
+        )
+
+    except AuthenticationError:
+
+        logger.error(
+            "OpenAI authentication failed "
+            "during research."
+        )
+
+        raise RuntimeError(
+            "Authentication with OpenAI failed. "
+            "Check your API key."
+        )
+
+    except RateLimitError:
+
+        logger.error(
+            "OpenAI rate limit reached "
+            "during research."
+        )
+
+        raise RuntimeError(
+            "OpenAI rate limit reached. "
+            "Please try again later."
+        )
+
+    except APITimeoutError:
+
+        logger.error(
+            "Research request timed out."
+        )
+
+        raise RuntimeError(
+            "The research request timed out. "
+            "Please try again."
+        )
+
+    except APIConnectionError:
+
+        logger.error(
+            "Could not connect to OpenAI "
+            "during research."
+        )
+
+        raise RuntimeError(
+            "Could not connect to OpenAI. "
+            "Check your internet connection."
+        )
+
+    except BadRequestError as error:
+
+        logger.error(
+            "Research request was rejected."
+        )
+
+        raise RuntimeError(
+            f"Research request failed: {error}"
+        )
 
     report = response.output_text
 
     if not report:
+
+        logger.error(
+            "Researcher returned an empty report."
+        )
+
         raise RuntimeError(
             "Researcher returned an empty report."
         )
+
+    logger.info(
+        "Research completed successfully."
+    )
 
     return report.strip()
