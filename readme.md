@@ -1,153 +1,568 @@
-AI Research Agent
+# 🔎 AI Research Agent
 
-A learning project where I am building an AI research agent from scratch and progressively improving it from simple rule-based logic to an LLM-powered agent with tool calling and web search.
+A research-focused AI agent built from first principles using Python and the OpenAI API.
 
-This project is part of my hands-on journey into AI agents, LLMs, Python, and AI automation.
+The agent converts a research question into a structured research plan, searches the web for current information, prioritizes reliable sources, cross-checks important claims, and synthesizes the evidence into a research answer.
 
-🚀 Project Goal
+This project was built incrementally to understand how AI agents work internally — from basic rule-based logic to planning, tool use, structured outputs, modular architecture, error handling, and automated testing.
 
-The goal of this project is to understand how AI agents are actually built rather than only using existing agent frameworks.
+---
 
-I am developing the agent step by step, documenting each stage and learning how different components work together.
+## ✨ What It Does
 
-🧠 Learning Journey
+The AI Research Agent can:
 
-The project currently contains the following stages:
+- Accept natural-language research questions
+- Generate a structured research plan
+- Perform real-time web research
+- Prioritize authoritative and primary sources
+- Cross-check important factual claims
+- Distinguish evidence from analysis
+- Produce research answers based on gathered evidence
+- Handle API and application errors gracefully
+- Validate planner output using structured schemas
+- Run automated tests without making real API calls
 
-Version	What I Learned
-V1	Rule-based research logic
-V2	First interaction with an LLM
-V3	LLM-based decision making
-V4	Tool definitions and function calling
-V5	Building an agent/tool execution loop
-V6	Adding web search capabilities
+### Example Research Request
 
-The project will continue to evolve as I learn more about AI agents.
+```text
+Research the most promising AI automation opportunities
+for small businesses in India.
+```
 
-🏗️ Current Architecture
+The workflow becomes:
 
-The current agent follows this general workflow:
+```text
+Research Question
+       ↓
+Research Planner
+       ↓
+Structured ResearchPlan
+       ↓
+Research Executor
+       ↓
+Web Search
+       ↓
+Evidence Gathering
+       ↓
+Source Evaluation
+       ↓
+Final Research Answer
+```
 
-User
-  │
-  ▼
-Research Topic
-  │
-  ▼
-LLM
-  │
-  ├── Need external information?
-  │          │
-  │          ▼
-  │      Search Tool
-  │          │
-  │          ▼
-  │      Search Results
-  │          │
-  └──────────┘
-  │
-  ▼
-Research Response
+---
 
-The architecture is still under development and will become more advanced as the project progresses.
+# 🏗️ Architecture
 
-📁 Project Structure
+The final version uses a modular planner-researcher architecture.
+
+```text
+                         USER
+                          │
+                          ▼
+                     ┌─────────┐
+                     │ main.py │
+                     └────┬────┘
+                          │
+                          ▼
+                  ┌───────────────┐
+                  │   AI Agent    │
+                  │ Orchestrator  │
+                  └───────┬───────┘
+                          │
+                          ▼
+                  ┌───────────────┐
+                  │    Planner    │
+                  │      LLM      │
+                  └───────┬───────┘
+                          │
+                          ▼
+                   ResearchPlan
+                  (Pydantic Model)
+                          │
+                          ▼
+                  ┌───────────────┐
+                  │  Researcher   │
+                  │      LLM      │
+                  │       +       │
+                  │  Web Search   │
+                  └───────┬───────┘
+                          │
+                          ▼
+                   Evidence-Based
+                   Research Answer
+```
+
+Supporting engineering components:
+
+```text
+Configuration
+     │
+     ├── Environment variables
+     └── OpenAI client
+
+Reliability
+     │
+     ├── Input validation
+     ├── Structured output validation
+     ├── Error handling
+     └── Application logging
+
+Testing
+     │
+     ├── pytest
+     ├── Mocked dependencies
+     └── 12 automated tests
+```
+
+---
+
+# 🧠 How the Agent Works
+
+## 1. Research Planning
+
+The planner receives the user's research question and determines what needs to be investigated.
+
+Instead of returning unrestricted text, the planner produces a structured `ResearchPlan`.
+
+Example:
+
+```python
+ResearchPlan(
+    objective="Identify promising AI automation opportunities.",
+    steps=[
+        "Assess current adoption trends.",
+        "Identify high-value automation workflows.",
+        "Compare the strongest opportunities."
+    ]
+)
+```
+
+The schema is validated using Pydantic.
+
+---
+
+## 2. Research Execution
+
+The structured plan is passed to the researcher.
+
+The researcher executes the plan using web search to gather current external information.
+
+It prioritizes sources roughly in this order:
+
+1. Government and regulatory sources
+2. Official institutions and organizations
+3. Academic and research institutions
+4. Official company documentation
+5. Established industry publications
+6. Reputable news organizations
+7. Secondary aggregators when stronger sources are unavailable
+
+---
+
+## 3. Evidence Evaluation
+
+The researcher follows evidence guardrails designed to reduce unsupported claims.
+
+Important factual claims should be supported by reliable evidence.
+
+The agent is instructed to:
+
+- Prefer primary sources
+- Cross-check important claims when practical
+- Identify disagreement between credible sources
+- Separate sourced facts from analysis
+- Avoid inventing statistics, market sizes, prices, ROI figures, dates, or company claims
+- Explicitly acknowledge information that cannot be verified
+
+---
+
+## 4. Research Synthesis
+
+Once sufficient evidence has been collected, the agent synthesizes the findings.
+
+Response depth depends on the research request.
+
+A focused factual request receives a concise research answer.
+
+A broader market or opportunity analysis can produce a more detailed structured report.
+
+---
+
+# 🗂️ Project Structure
+
+```text
 01-research-agent/
 │
-├── README.md
-├── .env.example
-├── .gitignore
-├── requirements.txt
-├── test_connection.py
+├── src/
+│   ├── __init__.py
+│   ├── agent.py
+│   ├── config.py
+│   ├── logger.py
+│   ├── models.py
+│   ├── planner.py
+│   ├── prompts.py
+│   └── researcher.py
 │
-├── v1_rule_based.py
-├── v2_first_llm_call.py
-├── v2_llm_decision.py
-├── v3_manual_tool.py
-├── v4_tool_calling.py
-├── v5_agent_loop.py
-└── v6_web_search.py
+├── tests/
+│   ├── __init__.py
+│   ├── test_agent.py
+│   ├── test_models.py
+│   ├── test_planner.py
+│   └── test_researcher.py
+│
+├── learning_versions/
+│   ├── v1_rule_based.py
+│   ├── v2_first_llm_call.py
+│   ├── v2_llm_decision.py
+│   ├── v3_manual_tool.py
+│   ├── v4_tool_calling.py
+│   ├── v5_agent_loop.py
+│   ├── v6_web_search.py
+│   ├── v6.1_multi_tool.py
+│   ├── v7_agent_loop.py
+│   └── v8_planning_agent.py
+│
+├── learning/
+│   ├── v9.1_modular_architecture.md
+│   ├── v9.2_structured_output.md
+│   └── v9.3_logging_error_handling.md
+│
+├── main.py
+├── README.md
+├── requirements.txt
+├── pytest.ini
+├── .env.example
+└── .gitignore
+```
 
-Each version represents a milestone in the development and learning process.
+### Core Components
 
-🛠️ Technologies
-Python
-OpenAI API
-python-dotenv
-Function Calling / Tools
-Git & GitHub
-VS Code
-⚙️ Setup
-1. Clone the repository
-git clone <repository-url>
-cd 01-research-agent
-2. Install dependencies
+| Component | Responsibility |
+|---|---|
+| `main.py` | CLI entry point |
+| `agent.py` | Orchestrates the complete workflow |
+| `planner.py` | Creates the structured research plan |
+| `researcher.py` | Executes research using web search |
+| `models.py` | Defines structured Pydantic models |
+| `prompts.py` | Stores planner and researcher instructions |
+| `config.py` | Handles configuration and OpenAI client creation |
+| `logger.py` | Provides application logging |
+| `tests/` | Automated unit tests |
+| `learning_versions/` | Earlier versions showing the project's evolution |
+
+---
+
+# 🛠️ Tech Stack
+
+- **Python**
+- **OpenAI Responses API**
+- **OpenAI Web Search**
+- **Pydantic**
+- **pytest**
+- **unittest.mock**
+- **python-dotenv**
+- **Python logging**
+
+---
+
+# 🚀 Getting Started
+
+## 1. Clone the Repository
+
+```bash
+git clone <YOUR-REPOSITORY-URL>
+cd ai-agent-journey/01-research-agent
+```
+
+## 2. Create a Virtual Environment
+
+### Windows
+
+```powershell
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+### macOS / Linux
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+## 3. Install Dependencies
+
+```bash
 pip install -r requirements.txt
-3. Configure environment variables
+```
 
-Create a .env file:
+## 4. Configure Environment Variables
 
+Copy:
+
+```text
+.env.example
+```
+
+to:
+
+```text
+.env
+```
+
+Then add your API key:
+
+```env
 OPENAI_API_KEY=your_api_key_here
+OPENAI_MODEL=gpt-5-mini
+LOG_LEVEL=INFO
+```
 
-Never commit your actual .env file or API key to GitHub.
+> Never commit your `.env` file or API key to GitHub.
 
-4. Run an agent version
+## 5. Run the Agent
 
-For example:
+```bash
+python main.py
+```
 
-python v6_web_search.py
-🔐 Environment Variables
+Example:
 
-The project uses:
+```text
+AI Research Agent
+=================
 
-OPENAI_API_KEY
+What would you like me to research?
+```
 
-A .env.example file is included to show the required configuration without exposing the actual API key.
+Enter a research-focused question such as:
 
-📚 What I'm Learning
+```text
+What are the most promising AI automation opportunities
+for small businesses in India?
+```
 
-Through this project, I am learning:
+---
 
-How LLM APIs work
-How to structure AI applications in Python
-How LLMs make tool decisions
-Function/tool calling
-Agent execution loops
-Connecting external tools to LLMs
-Web research workflows
-Error handling and debugging
-Git and GitHub
-Building and documenting AI projects
-🔭 What's Next?
+# 🧪 Automated Testing
 
-Planned improvements include:
+The project uses `pytest` and mocks external dependencies so the core application can be tested without making real OpenAI API calls.
 
-Real web search integration
-Better research result processing
-Source extraction and citations
-Structured research reports
-Multiple tools
-Agent memory
-Better error handling
-Improved prompts
-More autonomous decision making
-Eventually exploring agent frameworks such as LangGraph
-📈 Project Status
+Run:
 
-Status: 🚧 In Development
+```bash
+python -m pytest -v
+```
 
-This repository is intentionally being built incrementally. Each version represents something I learned and implemented rather than jumping directly to a finished framework-based agent.
+Current test suite:
 
-👨‍💻 About This Project
+```text
+12 passed
+```
 
-This is a hands-on portfolio project focused on learning AI agent engineering by building from first principles.
+Tests cover:
 
-The objective is not just to make an agent that works, but to understand why it works, how its components interact, and how the system can be improved over time.
+- Input validation
+- ResearchPlan creation
+- Pydantic schema validation
+- Maximum planner steps
+- Agent orchestration
+- Structured planner output
+- Empty planner responses
+- Research execution
+- Empty research responses
+- Web-search configuration
 
+This allows the application logic to be tested quickly without consuming API credits.
 
+---
 
-## Limitations
+# 🛡️ Error Handling & Logging
 
-- Research queries may take longer than standard LLM responses because the agent performs web searches and source verification.
-- Complex research tasks may consume more tokens due to planning, evidence gathering, and synthesis.
-- The agent is designed for research-oriented questions rather than casual or low-complexity queries.
+The application handles common failures including:
+
+- Invalid API credentials
+- Rate limits
+- API timeouts
+- Connection failures
+- Bad requests
+- Empty planner output
+- Empty research output
+- Invalid user input
+
+Example:
+
+```text
+INFO | src.agent | Research workflow started.
+INFO | src.planner | Creating research plan.
+ERROR | src.planner | OpenAI authentication failed during planning.
+
+Research failed:
+Authentication with OpenAI failed. Check your API key.
+```
+
+This keeps application-facing errors understandable while retaining useful operational logging.
+
+---
+
+# 📈 Development Journey
+
+This project was deliberately built incrementally rather than starting with an agent framework.
+
+| Version | Milestone | Key Learning |
+|---|---|---|
+| V1 | Rule-Based Research | Deterministic routing and basic program flow |
+| V2 | LLM Integration | Moving decisions from rules to an LLM |
+| V3 | Manual Custom Tool | Understanding tools as Python functions |
+| V4 | Function Calling | Allowing the model to request tools |
+| V5 | Tool Result Handling | Returning tool results to the model |
+| V6 | Web Search | Accessing current external information |
+| V7 | Agent Loop | Repeated model → tool → model execution |
+| V8 | Planning Agent | Separating planning from execution |
+| V9.1 | Modular Architecture | Separation of concerns |
+| V9.2 | Structured Outputs | Pydantic schemas and component contracts |
+| V9.3 | Logging & Error Handling | Production-style reliability |
+| V9.4 | Automated Testing | pytest and dependency mocking |
+| V9.5 | Evidence Guardrails | Source quality and research reliability |
+
+The progression can be summarized as:
+
+```text
+Rules
+  ↓
+LLM
+  ↓
+Tools
+  ↓
+Tool Calling
+  ↓
+Agent Loop
+  ↓
+Web Research
+  ↓
+Planning
+  ↓
+Structured Outputs
+  ↓
+Modular Architecture
+  ↓
+Reliability
+  ↓
+Automated Testing
+  ↓
+Research Quality
+```
+
+---
+
+# 💡 What I Learned
+
+Building the project incrementally helped me understand that an AI agent is more than an LLM prompt.
+
+A useful agent requires coordination between:
+
+```text
+Reasoning
+   +
+Planning
+   +
+Tools
+   +
+External Information
+   +
+State / Control Flow
+   +
+Validation
+   +
+Software Architecture
+   +
+Testing
+```
+
+Some of the most important concepts I learned include:
+
+- LLM API integration
+- Tool/function calling
+- Agent execution loops
+- Real-time web research
+- Planner/executor architecture
+- Prompt design
+- Structured LLM outputs
+- Pydantic validation
+- Separation of concerns
+- Application logging
+- Exception handling
+- Dependency mocking
+- Unit testing
+- Source-quality guardrails
+
+---
+
+# ⚠️ Limitations
+
+This project is intentionally optimized for **research-oriented tasks**, not low-latency general conversation.
+
+As a result:
+
+- Research requests can take longer than standard LLM responses because the agent performs planning and web research.
+- Research workflows may consume more tokens than simple chatbot responses.
+- Web information can still contain inaccuracies or conflicting claims.
+- Source quality depends partly on what information is publicly available.
+- Research conclusions should not automatically be treated as professional financial, legal, medical, or other high-stakes advice.
+- The current interface is command-line based.
+- The project focuses on understanding agent architecture rather than providing a production SaaS interface.
+
+---
+
+# 🔮 Possible Future Improvements
+
+The current version completes the learning objective for this project.
+
+Potential future extensions could include:
+
+- Persistent research sessions
+- Research history
+- Parallel research workers
+- Citation/source extraction into structured data
+- Export to Markdown or PDF
+- REST API using FastAPI
+- Web interface
+- Database-backed research storage
+- Evaluation datasets for research quality
+- Cost and token usage tracking
+
+These are intentionally left outside the current scope so the project remains focused.
+
+---
+
+# 🎯 Project Purpose
+
+This is the first project in my AI agent development portfolio.
+
+The primary goal was not simply to create a research chatbot.
+
+The goal was to understand how an AI agent evolves from basic Python logic into a modular system capable of:
+
+**planning → tool use → research → evidence evaluation → synthesis → validation**
+
+while maintaining understandable software architecture and automated tests.
+
+---
+
+# 📄 License
+
+This project is intended for educational and portfolio purposes.
+
+---
+
+## Project Status
+
+**Project #01 — AI Research Agent: Complete ✅**
+
+**Automated Tests:** 12 passing  
+**Interface:** CLI  
+**Architecture:** Planner → Researcher  
+**Research Capability:** Real-time web search  
+**Structured Output:** Pydantic  
+**Testing:** pytest + mocked external dependencies
