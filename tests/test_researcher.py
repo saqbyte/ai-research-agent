@@ -101,3 +101,46 @@ def test_researcher_rejects_empty_report(
             "AI automation",
             plan
         )
+
+@patch(
+    "src.researcher.get_openai_client"
+)
+def test_researcher_uses_web_search(
+    mock_get_client
+):
+
+    plan = create_fake_plan()
+
+    mock_response = MagicMock()
+    mock_response.output_text = (
+        "Research completed."
+    )
+
+    mock_client = MagicMock()
+
+    mock_client.responses.create.return_value = (
+        mock_response
+    )
+
+    mock_get_client.return_value = (
+        mock_client
+    )
+
+    execute_research(
+        "Research AI automation",
+        plan
+    )
+
+    call_kwargs = (
+        mock_client
+        .responses
+        .create
+        .call_args
+        .kwargs
+    )
+
+    assert call_kwargs["tools"] == [
+        {
+            "type": "web_search"
+        }
+    ]

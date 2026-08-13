@@ -80,9 +80,13 @@ Do not create another plan.
 
 Use web research to gather reliable evidence.
 
-When sufficient information has been collected,
-answer the user's request at an appropriate level
-of detail.
+When sufficient reliable evidence has been collected,
+answer the user's research request.
+
+Follow the source-quality and evidence rules from
+your system instructions.
+
+Do not create another research plan.
 """
 
     logger.info(
